@@ -120,7 +120,7 @@ fun ResultScreen(viewModelPython: ViewModelPython, navController: androidx.navig
                             style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
                             color = androidx.compose.material3.MaterialTheme.colorScheme.onSecondaryContainer
                         )
-                        androidx.compose.material3.HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                        androidx.compose.material3.Divider(modifier = Modifier.padding(vertical = 8.dp))
                         Text(
                             text = message ?: "计算完成，暂无摘要信息",
                             style = androidx.compose.material3.MaterialTheme.typography.bodyLarge
@@ -140,7 +140,7 @@ fun ResultScreen(viewModelPython: ViewModelPython, navController: androidx.navig
                                 "详细数值结果",
                                 style = androidx.compose.material3.MaterialTheme.typography.titleMedium
                             )
-                            androidx.compose.material3.HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                            androidx.compose.material3.Divider(modifier = Modifier.padding(vertical = 8.dp))
                             resultData.forEachIndexed { index, value ->
                                 androidx.compose.foundation.layout.Row(
                                     modifier = Modifier

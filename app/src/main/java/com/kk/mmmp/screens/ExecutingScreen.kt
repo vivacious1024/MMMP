@@ -37,8 +37,28 @@ import java.io.InputStream
 @Composable
 fun ExecutingScreen(navController: NavController, viewModelPython: ViewModelPython, operation: String) {
     val context = LocalContext.current
-    val fileUri = filePicker()
-    
+    // 状态管理：文件 URI
+    val fileUri = remember { androidx.compose.runtime.mutableStateOf<android.net.Uri?>(null) }
+
+    // 文件选择器启动器
+    val launcher = androidx.activity.compose.rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
+    ) { uri: android.net.Uri? ->
+        // 当用户选择文件后，保存 URI 并持久化权限（如果需要，一般建议 takePersistableUriPermission）
+        uri?.let {
+            fileUri.value = it
+            // 尝试获取持久权限，防止稍后读取失败
+            try {
+                context.contentResolver.takePersistableUriPermission(
+                    it,
+                    android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -81,26 +101,51 @@ fun ExecutingScreen(navController: NavController, viewModelPython: ViewModelPyth
                 }
             }
 
-            // 文件选择状态
+            // 文件选择区域
             androidx.compose.material3.Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 24.dp),
                 colors = androidx.compose.material3.CardDefaults.cardColors(
-                    containerColor = if (fileUri != null) Color(0xFFE8F5E9) else Color(0xFFFFF3E0)
+                    containerColor = if (fileUri.value != null) Color(0xFFE8F5E9) else Color(0xFFFFF3E0)
                 )
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(
+                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Text(
-                        text = if (fileUri != null) "已选择文件:" else "尚未选择数据文件",
-                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                        text = if (fileUri.value != null) "已就绪" else "准备数据",
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.Start)
                     )
-                    if (fileUri != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    if (fileUri.value != null) {
                         Text(
-                            text = fileUri.path ?: "未知路径",
-                            maxLines = 1,
-                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            text = "文件已选择: ${fileUri.value?.path?.substringAfterLast("/") ?: "未知文件"}",
+                            color = Color(0xFF2E7D32),
+                            modifier = Modifier.padding(bottom = 8.dp)
                         )
+                        Button(
+                            onClick = { launcher.launch(arrayOf("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel")) },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                        ) {
+                            Text("重新选择")
+                        }
+                    } else {
+                        Text(
+                            text = "请导入 Excel 数据文件 (.xlsx / .xls)",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray,
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
+                        Button(onClick = { 
+                            // 限制只选择 Excel 文件
+                            launcher.launch(arrayOf("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel")) 
+                        }) {
+                            Text("点击选择文件")
+                        }
                     }
                 }
             }
@@ -109,13 +154,13 @@ fun ExecutingScreen(navController: NavController, viewModelPython: ViewModelPyth
 
             Button(
                 onClick = {
-                    if (fileUri != null) {
+                    if (fileUri.value != null) {
                         when (operation) {
-                            "AHP" -> viewModelPython.callPythonCodeAHP(fileUri)
-                            "EWM" -> viewModelPython.callPythonCodeEWM(fileUri)
-                            "LOG" -> viewModelPython.callPythonCodeLOG(fileUri)
-                            "TOPSIS" -> viewModelPython.callPythonCodeTOPSIS(fileUri)
-                            "GREY" -> viewModelPython.callPythonCodeGREY(fileUri)
+                            "AHP" -> viewModelPython.callPythonCodeAHP(fileUri.value!!)
+                            "EWM" -> viewModelPython.callPythonCodeEWM(fileUri.value!!)
+                            "LOG" -> viewModelPython.callPythonCodeLOG(fileUri.value!!)
+                            "TOPSIS" -> viewModelPython.callPythonCodeTOPSIS(fileUri.value!!)
+                            "GREY" -> viewModelPython.callPythonCodeGREY(fileUri.value!!)
                             else -> Toast.makeText(context, "未知的操作类型", Toast.LENGTH_SHORT).show()
                         }
                         navController.navigate("resultScreen")
@@ -126,6 +171,7 @@ fun ExecutingScreen(navController: NavController, viewModelPython: ViewModelPyth
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
+                enabled = fileUri.value != null, // 没选文件时禁用按钮
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
             ) {
                 Text(text = "开始运行算法", fontSize = 18.sp)
