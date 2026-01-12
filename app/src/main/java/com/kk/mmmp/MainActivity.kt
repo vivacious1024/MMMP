@@ -57,6 +57,11 @@ fun AppNavigation(){
         composable("executingScreenLOG"){ ExecutingScreen(navController, viewModelPython, "LOG") }
         composable("executingScreenTOPSIS"){ ExecutingScreen(navController, viewModelPython, "TOPSIS") }
         composable("executingScreenGREY"){ ExecutingScreen(navController, viewModelPython, "GREY") }
+        composable("executingScreenMissingValue"){ ExecutingScreen(navController, viewModelPython, "MISSING") }
+        composable("executingScreenOutlier"){ ExecutingScreen(navController, viewModelPython, "OUTLIER") }
+        composable("executingScreenCorrelation"){ ExecutingScreen(navController, viewModelPython, "CORR") }
+        composable("executingScreenKMeans"){ ExecutingScreen(navController, viewModelPython, "KMEANS") }
+        composable("executingScreenLinearReg"){ ExecutingScreen(navController, viewModelPython, "LINREG") }
         composable("ERROR"){ ErrorScreen(navController) }
 
         composable("resultScreen"){ ResultScreen(viewModelPython, navController) }                        //到resultScreen时执行ResultScreen()

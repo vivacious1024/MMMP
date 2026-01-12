@@ -125,6 +125,15 @@ fun nameConversion(sub: String) : String {
         "异常值处理" -> {
             "executingScreenOutlier"
         }
+        "卡方检验", "协方差" -> {
+             "executingScreenCorrelation"
+        }
+        "K-Means算法" -> {
+             "executingScreenKMeans"
+        }
+         "回归分析预测" -> {
+             "executingScreenLinearReg"
+         }
         else -> {
             println("Unknown sub button clicked: $sub")
             "ERROR"

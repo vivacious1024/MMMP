@@ -85,7 +85,7 @@ fun ExecutingScreen(navController: NavController, viewModelPython: ViewModelPyth
             androidx.compose.material3.Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(250.dp)
+                    .weight(1f)
                     .padding(bottom = 16.dp),
                 elevation = androidx.compose.material3.CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
@@ -150,7 +150,7 @@ fun ExecutingScreen(navController: NavController, viewModelPython: ViewModelPyth
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+
 
             Button(
                 onClick = {
@@ -161,6 +161,11 @@ fun ExecutingScreen(navController: NavController, viewModelPython: ViewModelPyth
                             "LOG" -> viewModelPython.callPythonCodeLOG(fileUri.value!!)
                             "TOPSIS" -> viewModelPython.callPythonCodeTOPSIS(fileUri.value!!)
                             "GREY" -> viewModelPython.callPythonCodeGREY(fileUri.value!!)
+                            "CORR" -> viewModelPython.callPythonCodeCorrelation(fileUri.value!!)
+                            "KMEANS" -> viewModelPython.callPythonCodeKMeans(fileUri.value!!)
+                            "LINREG" -> viewModelPython.callPythonCodeLinearReg(fileUri.value!!)
+                            "MISSING" -> viewModelPython.callPythonDataPreprocess(fileUri.value!!, "缺失值处理")
+                            "OUTLIER" -> viewModelPython.callPythonDataPreprocess(fileUri.value!!, "异常值处理")
                             else -> Toast.makeText(context, "未知的操作类型", Toast.LENGTH_SHORT).show()
                         }
                         navController.navigate("resultScreen")
@@ -187,7 +192,14 @@ fun ModelDescription(modelName: String) {
         mapOf(
             "AHP" to R.raw.ahp,
             "EWM" to R.raw.ewm,
-            "LOG" to R.raw.logistic
+            "LOG" to R.raw.logistic,
+            "TOPSIS" to R.raw.topsis,
+            "GREY" to R.raw.grey,
+            "MISSING" to R.raw.missing,
+            "OUTLIER" to R.raw.outlier,
+            "CORR" to R.raw.corr,
+            "KMEANS" to R.raw.kmeans,
+            "LINREG" to R.raw.linreg
         )
     }
     val resourceId = resourceMap[modelName]

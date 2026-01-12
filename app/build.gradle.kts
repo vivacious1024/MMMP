@@ -5,11 +5,7 @@ plugins {
     id("com.google.devtools.ksp")     //ksp
     id("com.chaquo.python")         //chaquo
 }
-// For KSP
-ksp {
-    arg("option_name", "option_value")
-    // other options...
-}
+
 
 android {
     namespace = "com.kk.mmmp"

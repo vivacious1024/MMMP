@@ -230,4 +230,90 @@ class ViewModelPython(private val pythonRepository: PythonRepository) : ViewMode
             }
         }
     }
+
+    fun callPythonCodeCorrelation(fileUri: Uri) {
+        viewModelScope.launch {
+            try {
+                val python = Python.getInstance()
+                val pythonScript = python.getModule("Correlation")
+                val filePath = pythonRepository.copyFileToInternalStorage(fileUri, "Correlation_copy.xlsx")
+
+                val result = pythonScript.callAttr("main", filePath)
+                val resultList = result.asList()
+                
+                if (resultList[0] == null) {
+                    _message.value = "相关性分析失败，可能是数据无数值列。"
+                    return@launch
+                }
+
+                val info = resultList[0].asList().first().toString()
+                val imagePath = resultList[1].toString()
+
+                _message.value = "协方差/相关性矩阵计算完成。\n$info"
+                _imageFilePath.value = imagePath
+                _resultData.value = emptyList() // Result is mainly visual
+            } catch (e: Exception) {
+                Log.e("PythonCodeCORR", "Failed: ${e.message}")
+                _message.value = "相关性分析出错: ${e.localizedMessage}"
+            }
+        }
+    }
+
+    fun callPythonCodeKMeans(fileUri: Uri) {
+        viewModelScope.launch {
+            try {
+                val python = Python.getInstance()
+                val pythonScript = python.getModule("KMeansClustering")
+                val filePath = pythonRepository.copyFileToInternalStorage(fileUri, "KMeans_copy.xlsx")
+
+                val result = pythonScript.callAttr("main", filePath)
+                val resultList = result.asList()
+                
+                if (resultList[0] == null) {
+                    _message.value = "K-Means聚类失败。"
+                    return@launch
+                }
+
+                val inertia = resultList[0].asList().first().toDouble()
+                val imagePath = resultList[1].toString()
+
+                _message.value = "K-Means聚类完成 (k=3)。\nInertia: ${String.format("%.2f", inertia)}"
+                _imageFilePath.value = imagePath
+                _resultData.value = listOf(inertia)
+            } catch (e: Exception) {
+                Log.e("PythonCodeKMEANS", "Failed: ${e.message}")
+                _message.value = "K-Means运行出错: ${e.localizedMessage}"
+            }
+        }
+    }
+
+    fun callPythonCodeLinearReg(fileUri: Uri) {
+        viewModelScope.launch {
+            try {
+                val python = Python.getInstance()
+                val pythonScript = python.getModule("LinearRegression")
+                val filePath = pythonRepository.copyFileToInternalStorage(fileUri, "LinearReg_copy.xlsx")
+
+                val result = pythonScript.callAttr("main", filePath)
+                val resultList = result.asList()
+                
+                if (resultList[0] == null) {
+                    _message.value = "回归分析失败，需至少2列数值数据。"
+                    return@launch
+                }
+
+                val metrics = resultList[0].asList() // [R2, MSE, ...]
+                val r2 = metrics[0].toDouble()
+                val mse = metrics[1].toDouble()
+                val imagePath = resultList[1].toString()
+
+                _message.value = "线性回归分析完成。\nR2 Score: ${String.format("%.4f", r2)}\nMSE: ${String.format("%.4f", mse)}"
+                _imageFilePath.value = imagePath
+                _resultData.value = metrics.map { it.toDouble() }
+            } catch (e: Exception) {
+                Log.e("PythonCodeREG", "Failed: ${e.message}")
+                _message.value = "回归分析出错: ${e.localizedMessage}"
+            }
+        }
+    }
 }
